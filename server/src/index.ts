@@ -1,12 +1,15 @@
 // Rakenduse sisenemispunkt ja Express serveri seadistus
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import userRoutes from './routes/userRoutes';
 import { errorMiddleware } from './middleware/errorMiddleware';
 import { notFoundHandler } from './middleware/notFoundMiddleware';
 import { prisma } from './lib/prisma';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
