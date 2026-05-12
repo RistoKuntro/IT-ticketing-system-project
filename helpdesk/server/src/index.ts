@@ -2,7 +2,10 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
+import ticketRoutes from './routes/ticketRoutes';
+import userRoutes from './routes/userRoutes';
 import { errorMiddleware } from './middleware/errorMiddleware';
+import { notFoundHandler } from './middleware/notFoundMiddleware';
 import { prisma } from './lib/prisma';
 
 const app = express();
@@ -13,6 +16,9 @@ app.use(express.json());
 
 // Marsruudid
 app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/users', userRoutes);
+app.use(notFoundHandler);
 
 // Globaalne veakäsitleja (peab olema viimane middleware)
 app.use(errorMiddleware);
