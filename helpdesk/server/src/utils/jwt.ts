@@ -7,7 +7,17 @@ export interface JwtPayload {
   role: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable must be set');
+  }
+
+  return secret;
+};
+
+const JWT_SECRET = getJwtSecret();
 
 export const generateToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
