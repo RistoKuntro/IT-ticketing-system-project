@@ -1,1 +1,0 @@
-# IT-ticketing-system-project
