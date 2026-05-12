@@ -25,7 +25,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       data: {
         name,
         email,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         roleId: userRole.id
       },
       include: { role: true }
@@ -65,7 +65,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       return;
     }
 
-    const isMatch = await comparePassword(password, user.password);
+    const isMatch = await comparePassword(password, user.passwordHash);
     if (!isMatch) {
       res.status(401).json({ error: 'Vale e-post või parool' });
       return;

@@ -46,7 +46,7 @@ model Solution {
   content   String
   ticketId  Int
   authorId  Int
-  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
 }
