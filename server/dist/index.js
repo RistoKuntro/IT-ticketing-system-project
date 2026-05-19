@@ -6,12 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Rakenduse sisenemispunkt ja Express serveri seadistus
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const ticketRoutes_1 = __importDefault(require("./routes/ticketRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const errorMiddleware_1 = require("./middleware/errorMiddleware");
 const notFoundMiddleware_1 = require("./middleware/notFoundMiddleware");
 const prisma_1 = require("./lib/prisma");
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 app.use((0, cors_1.default)());
