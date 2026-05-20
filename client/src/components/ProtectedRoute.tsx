@@ -1,25 +1,30 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { useSessionRestore } from '../hooks/useSessionRestore';
 
-export const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: string[] }) => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+interface ProtectedRouteProps {
+  children: ReactNode;
+  requiredRole?: 'admin' | 'user';
+}
+
+const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+  const { isAuthenticated, isAdmin } = useAuth();
+  const { isRestoring } = useSessionRestore();
+
+  if (isRestoring) {
+    return <div className="loading">Kontrollin sessiooni...</div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles) {
-    if (!user) {
-      return <Navigate to="/login" replace />;
-    }
-
-    if (!allowedRoles.includes(user.role)) {
-      return <Navigate to="/" replace />;
-    }
+  if (requiredRole === 'admin' && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
