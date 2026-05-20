@@ -2,11 +2,16 @@ import api from './axiosInstance';
 import { AuthUser } from '../types';
 
 export const login = async (credentials: any) => {
-  const { data } = await api.post<{token: string, user: AuthUser}>('/auth/login', credentials);
+  const { data } = await api.post<{ token: string; user: AuthUser }>('/auth/login', credentials);
   return data;
 };
 
 export const register = async (userData: any) => {
-  const { data } = await api.post<{token: string, user: AuthUser}>('/auth/register', userData);
+  const { data } = await api.post<{ token: string; user: AuthUser }>('/auth/register', userData);
+  return data;
+};
+
+export const getMe = async () => {
+  const { data } = await api.get<AuthUser>('/auth/me');
   return data;
 };

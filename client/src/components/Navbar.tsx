@@ -14,21 +14,26 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="p-4 bg-gray-800 text-white flex justify-between">
-      <Link to="/" className="font-bold text-xl">IT Tugi</Link>
-      <div>
-        {isAuthenticated ? (
-          <>
-            <span className="mr-4">Tere, {user?.name}</span>
-            <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded">Logi välja</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="mr-4">Logi sisse</Link>
-            <Link to="/register">Loo konto</Link>
-          </>
-        )}
+    <header className="navbar">
+      <div className="nav-left">
+        <Link to="/" className="nav-brand">IT Tugi</Link>
       </div>
-    </nav>
+
+      <nav className="nav-right">
+        {isAuthenticated ? (
+          <div className="nav-links">
+            <span className="nav-welcome">Tere, {user?.name}</span>
+            <button onClick={handleLogout} className="btn-logout">Logi välja</button>
+          </div>
+        ) : (
+          <div className="nav-links">
+            <Link to="/login" className="nav-link">Logi sisse</Link>
+            <Link to="/register" className="nav-link">Loo konto</Link>
+          </div>
+        )}
+      </nav>
+    </header>
   );
 };
+
+export default Navbar;
