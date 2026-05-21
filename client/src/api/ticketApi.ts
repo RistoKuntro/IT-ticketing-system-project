@@ -25,3 +25,13 @@ export const addSolution = async (ticketId: number, solutionData: any) => {
   const { data } = await api.post<Solution>(`/tickets/${ticketId}/solutions`, solutionData);
   return data;
 };
+
+export const deleteSolution = async (ticketId: number, solutionId: number) => {
+  const { data } = await api.delete<Solution>(`/tickets/${ticketId}/solutions/${solutionId}`);
+  return data;
+};
+
+export const deleteTicket = async (id: number) => {
+  const { data } = await api.delete<Ticket>(`/tickets/${id}`);
+  return data;
+};

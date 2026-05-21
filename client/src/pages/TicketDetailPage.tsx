@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTickets } from "../hooks/useTickets";
-import Badge from "../components/Badge";
-import FormField from "../components/FormField";
+import { Badge } from "../components/Badge";
+import { FormField } from "../components/FormField";
 import { getUsers } from "../api/userApi";
 import { deleteSolution } from "../api/ticketApi";
 import { User } from "../types";
 
-export default function TicketDetailPage() {
+export const TicketDetailPage = () => {
   const [solutionContent, setSolutionContent] = useState<string>("");
   const [solutionError, setSolutionError] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
