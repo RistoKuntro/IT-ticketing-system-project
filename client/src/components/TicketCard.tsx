@@ -51,15 +51,3 @@ export default function TicketCard({ ticket, isAdmin, onView, onDelete }: Ticket
   );
 }
 
-/* LISA index.css-i:
-.ticket-card { background:white; border-radius:10px; padding:1.25rem; border:1px solid #e5e7eb; transition:box-shadow 0.2s; }
-.ticket-card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.08); }
-.ticket-card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:0.5rem; }
-.ticket-title { font-size:1rem; font-weight:600; color:#1a1a2e; flex:1; margin:0; }
-.ticket-badges { display:flex; gap:0.375rem; flex-shrink:0; flex-wrap:wrap; }
-.ticket-description { font-size:0.875rem; color:#6b7280; margin-bottom:1rem; line-height:1.5; }
-.ticket-card-footer { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; }
-.ticket-meta { display:flex; gap:1rem; font-size:0.75rem; color:#9ca3af; flex-wrap:wrap; }
-.ticket-actions { display:flex; gap:0.5rem; }
-.btn-sm { padding:6px 12px !important; font-size:0.8rem !important; }
-*/
