@@ -27,7 +27,7 @@ export default function TicketDetailPage() {
   useEffect(() => {
     if (!isAdmin) return;
     getUsers()
-      .then(res => setUsers(res.users))
+      .then(res => setUsers(res))
       .catch(() => {});
   }, [isAdmin]);
 
