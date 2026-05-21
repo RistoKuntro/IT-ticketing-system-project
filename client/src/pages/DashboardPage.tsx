@@ -47,7 +47,7 @@ export default function DashboardPage() {
     }
   }
 
-  function handleFilterChange(key: string, value: string) {
+  function handleFilterChange(key: "status" | "priority" | "search", value: string) {
     if (key === "search") setLocalSearch(value);
     else changeFilters({ [key]: value });
   }
