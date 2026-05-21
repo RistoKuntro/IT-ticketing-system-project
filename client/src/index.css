@@ -247,6 +247,7 @@ body {
 .ticket-meta { display:flex; gap:1rem; font-size:0.75rem; color:#9ca3af; flex-wrap:wrap; }
 .ticket-actions { display:flex; gap:0.5rem; }
 .btn-sm { padding:6px 12px !important; font-size:0.8rem !important; }
+.password-wrapper button {
   cursor: pointer;
   color: #666;
   height: 34px;
