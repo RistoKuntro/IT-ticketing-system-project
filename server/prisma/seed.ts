@@ -10,6 +10,12 @@ async function main() {
     create: { name: 'admin' },
   });
 
+  const specialistRole = await prisma.role.upsert({
+    where: { name: 'specialist' },
+    update: {},
+    create: { name: 'specialist' },
+  });
+
   const userRole = await prisma.role.upsert({
     where: { name: 'user' },
     update: {},

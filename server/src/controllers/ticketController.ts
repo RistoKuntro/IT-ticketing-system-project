@@ -36,7 +36,7 @@ export const getAllTickets = async (req: Request, res: Response, next: NextFunct
       ];
     }
 
-    if (req.user?.role !== 'admin') {
+    if (req.user?.role !== 'admin' && req.user?.role !== 'specialist') {
       where.creatorId = req.user?.id;
     }
 
@@ -61,7 +61,7 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
       return;
     }
 
-    if (req.user?.role !== 'admin' && ticket.creatorId !== req.user?.id) {
+    if (req.user?.role !== 'admin' && req.user?.role !== 'specialist' && ticket.creatorId !== req.user?.id) {
       res.status(403).json({ error: 'Puuduvad õigused' });
       return;
     }
@@ -113,15 +113,17 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
 
     const isCreator = ticket.creatorId === req.user?.id;
     const isAdmin = req.user?.role === 'admin';
+    const isSpecialist = req.user?.role === 'specialist';
+    const canManageAll = isAdmin || isSpecialist;
 
-    if (!isAdmin && !isCreator) {
+    if (!canManageAll && !isCreator) {
       res.status(403).json({ error: 'Puuduvad õigused' });
       return;
     }
 
     const updateData: Prisma.TicketUpdateInput = {};
 
-    if (isCreator && !isAdmin) {
+    if (isCreator && !canManageAll) {
       if (ticket.status !== 'open') {
         res.status(403).json({ error: 'Puuduvad õigused' });
         return;
@@ -144,7 +146,7 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       }
     }
 
-    if (isAdmin) {
+    if (canManageAll) {
       if (typeof title !== 'undefined') {
         updateData.title = title;
       }

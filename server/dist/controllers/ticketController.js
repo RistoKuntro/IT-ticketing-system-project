@@ -26,7 +26,7 @@ const getAllTickets = async (req, res, next) => {
                 { description: { contains: search, mode: 'insensitive' } },
             ];
         }
-        if (req.user?.role !== 'admin') {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'specialist') {
             where.creatorId = req.user?.id;
         }
         const [tickets, total] = await Promise.all([
@@ -48,7 +48,7 @@ const getTicketById = async (req, res, next) => {
             res.status(404).json({ error: 'Pilet ei leitud' });
             return;
         }
-        if (req.user?.role !== 'admin' && ticket.creatorId !== req.user?.id) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'specialist' && ticket.creatorId !== req.user?.id) {
             res.status(403).json({ error: 'Puuduvad õigused' });
             return;
         }
@@ -90,12 +90,14 @@ const updateTicket = async (req, res, next) => {
         const { title, description, priority, status, assigneeId } = req.body;
         const isCreator = ticket.creatorId === req.user?.id;
         const isAdmin = req.user?.role === 'admin';
-        if (!isAdmin && !isCreator) {
+        const isSpecialist = req.user?.role === 'specialist';
+        const canManageAll = isAdmin || isSpecialist;
+        if (!canManageAll && !isCreator) {
             res.status(403).json({ error: 'Puuduvad õigused' });
             return;
         }
         const updateData = {};
-        if (isCreator && !isAdmin) {
+        if (isCreator && !canManageAll) {
             if (ticket.status !== 'open') {
                 res.status(403).json({ error: 'Puuduvad õigused' });
                 return;
@@ -113,7 +115,7 @@ const updateTicket = async (req, res, next) => {
                 updateData.status = 'cancelled';
             }
         }
-        if (isAdmin) {
+        if (canManageAll) {
             if (typeof title !== 'undefined') {
                 updateData.title = title;
             }

@@ -16,7 +16,8 @@ export const TicketDetailPage = () => {
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isSpecialist } = useAuth();
+  const canManageAll = isAdmin || isSpecialist;
   const { selectedTicket, isLoading, error, loadTicket, updateTicket, createSolution, clearTicket } = useTickets();
 
   useEffect(() => {
@@ -25,11 +26,11 @@ export const TicketDetailPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!canManageAll) return;
     getUsers()
       .then(res => setUsers(res.users))
       .catch(() => {});
-  }, [isAdmin]);
+  }, [canManageAll]);
 
   async function handleStatusChange(status: string) {
     try {
@@ -153,7 +154,7 @@ export const TicketDetailPage = () => {
                           </div>
                         </div>
                       </div>
-                      {isAdmin && (
+                      {(canManageAll || user?.id === solution.author.id) && (
                         <button className="btn btn-sm btn-danger" onClick={() => handleDeleteSolution(solution.id)}>
                           Kustuta
                         </button>
@@ -166,8 +167,8 @@ export const TicketDetailPage = () => {
                 ))}
               </div>
 
-              {/* Lahenduse lisamine — ainult admin */}
-              {isAdmin && (
+              {/* Lahenduse lisamine — admin või spetsialist */}
+              {canManageAll && (
                 <div className="detail-section">
                   <h2>Lisa lahendus</h2>
                   {solutionError && (
@@ -211,8 +212,8 @@ export const TicketDetailPage = () => {
                 </dl>
               </div>
 
-              {/* Admin haldus */}
-              {isAdmin && (
+              {/* Admin ja spetsialisti haldus */}
+              {canManageAll && (
                 <div className="sidebar-card">
                   <h3>Halda piletit</h3>
                   <FormField label="Staatus">
@@ -228,6 +229,19 @@ export const TicketDetailPage = () => {
                     </select>
                   </FormField>
                   <div style={{ marginTop: "0.75rem" }}>
+                    <FormField label="Prioriteet">
+                      <select
+                        className="input"
+                        value={selectedTicket.priority}
+                        onChange={e => updateTicket(selectedTicket.id, { priority: e.target.value })}
+                      >
+                        <option value="low">Madal</option>
+                        <option value="medium">Keskmine</option>
+                        <option value="high">Kõrge</option>
+                      </select>
+                    </FormField>
+                  </div>
+                  <div style={{ marginTop: "0.75rem" }}>
                     <FormField label="Töötaja">
                       <select
                         className="input"
@@ -236,7 +250,7 @@ export const TicketDetailPage = () => {
                       >
                         <option value="">Määramata</option>
                         {users.map(u => (
-                          <option key={u.id} value={u.id.toString()}>{u.name}</option>
+                          <option key={u.id} value={u.id.toString()}>{u.name} ({u.role.name})</option>
                         ))}
                       </select>
                     </FormField>
@@ -245,7 +259,7 @@ export const TicketDetailPage = () => {
               )}
 
               {/* Kasutaja tühistamine */}
-              {!isAdmin && selectedTicket.status === "open" && selectedTicket.creator.id === user?.id && (
+              {!canManageAll && selectedTicket.status === "open" && selectedTicket.creator.id === user?.id && (
                 <div className="sidebar-card">
                   <h3>Tegevused</h3>
                   <button className="btn btn-danger" style={{ width: "100%" }} onClick={handleCancelTicket}>

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserRole = exports.getAllUsers = void 0;
+exports.updateUser = exports.deleteUser = exports.updateUserRole = exports.getAllUsers = void 0;
 const prisma_1 = require("../lib/prisma");
 const getAllUsers = async (req, res, next) => {
     try {
@@ -60,3 +60,37 @@ const updateUserRole = async (req, res, next) => {
     }
 };
 exports.updateUserRole = updateUserRole;
+const deleteUser = async (req, res, next) => {
+    try {
+        const userId = Number(req.params.id);
+        await prisma_1.prisma.user.delete({ where: { id: userId } });
+        res.status(200).json({ message: 'Kasutaja kustutatud' });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.deleteUser = deleteUser;
+const updateUser = async (req, res, next) => {
+    try {
+        const userId = Number(req.params.id);
+        const { name } = req.body;
+        const updatedUser = await prisma_1.prisma.user.update({
+            where: { id: userId },
+            data: { name },
+            include: { role: true },
+        });
+        res.status(200).json({
+            user: {
+                id: updatedUser.id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+            },
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.updateUser = updateUser;
