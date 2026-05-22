@@ -108,7 +108,7 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       description?: string;
       priority?: Priority;
       status?: TicketStatus;
-      assigneeId?: number;
+      assigneeId?: number | null;
     };
 
     const isCreator = ticket.creatorId === req.user?.id;
@@ -162,7 +162,11 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       }
 
       if (typeof assigneeId !== 'undefined') {
-        updateData.assignee = { connect: { id: assigneeId } };
+        if (assigneeId === null) {
+          updateData.assignee = { disconnect: true };
+        } else {
+          updateData.assignee = { connect: { id: assigneeId } };
+        }
       }
     }
 
