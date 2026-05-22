@@ -6,7 +6,7 @@ import Modal from "../components/Modal";
 import TicketForm from "../components/TicketForm";
 import TicketCard from "../components/TicketCard";
 
-export default function DashboardPage() {
+export const DashboardPage = () => {
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
