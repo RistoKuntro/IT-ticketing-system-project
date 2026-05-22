@@ -10,7 +10,7 @@ const getAllUsers = async (req, res, next) => {
                 name: true,
                 email: true,
                 createdAt: true,
-                role: { select: { name: true } },
+                role: { select: { id: true, name: true } },
             },
         });
         res.status(200).json({
@@ -18,7 +18,7 @@ const getAllUsers = async (req, res, next) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role.name,
+                role: user.role,
                 createdAt: user.createdAt,
             })),
         });
@@ -51,7 +51,7 @@ const updateUserRole = async (req, res, next) => {
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                role: updatedUser.role.name,
+                role: updatedUser.role,
             },
         });
     }

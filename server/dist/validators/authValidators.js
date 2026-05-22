@@ -34,7 +34,7 @@ exports.loginValidators = [
 const validate = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
-        res.status(422).json({ errors: errors.array() });
+        res.status(422).json({ error: errors.array()[0].msg, errors: errors.array() });
         return;
     }
     next();

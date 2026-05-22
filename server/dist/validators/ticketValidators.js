@@ -43,7 +43,7 @@ exports.updateTicketValidators = [
         .isIn(['open', 'in_progress', 'closed', 'cancelled'])
         .withMessage('Status peab olema open, in_progress, closed või cancelled'),
     (0, express_validator_1.body)('assigneeId')
-        .optional()
+        .optional({ nullable: true })
         .isInt({ gt: 0 })
         .withMessage('assigneeId peab olema positiivne täisarv'),
 ];
