@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './store';
-import { Ticket, Solution } from '../types';
+import { Ticket } from '../types';
 import * as ticketApi from '../api/ticketApi';
 
 interface FiltersState {
