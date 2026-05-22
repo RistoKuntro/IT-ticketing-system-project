@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from './store';
 import { Ticket, Solution } from '../types';
 import * as ticketApi from '../api/ticketApi';
 
@@ -193,11 +194,11 @@ const ticketsSlice = createSlice({
 export const { setFilters, clearFilters, clearSelectedTicket } = ticketsSlice.actions;
 
 // Selectors
-export const selectTickets = (state: any) => state.tickets.tickets;
-export const selectSelectedTicket = (state: any) => state.tickets.selectedTicket;
-export const selectTicketsLoading = (state: any) => state.tickets.loading;
-export const selectTicketsError = (state: any) => state.tickets.error;
-export const selectFilters = (state: any) => state.tickets.filters;
-export const selectTotal = (state: any) => state.tickets.total;
+export const selectTickets = (state: RootState) => state.tickets.tickets;
+export const selectSelectedTicket = (state: RootState) => state.tickets.selectedTicket;
+export const selectTicketsLoading = (state: RootState) => state.tickets.loading;
+export const selectTicketsError = (state: RootState) => state.tickets.error;
+export const selectFilters = (state: RootState) => state.tickets.filters;
+export const selectTotal = (state: RootState) => state.tickets.total;
 
 export default ticketsSlice.reducer;
