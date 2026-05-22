@@ -1,10 +1,7 @@
 // Rakenduse sisenemispunkt ja Express serveri seadistus
+import 'dotenv/config'; 
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-// Load environment variables as early as possible so other modules can use them
-dotenv.config();
 
 import authRoutes from './routes/authRoutes';
 import ticketRoutes from './routes/ticketRoutes';

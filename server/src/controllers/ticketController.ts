@@ -121,7 +121,7 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
 
     const updateData: Prisma.TicketUpdateInput = {};
 
-    if (isCreator) {
+    if (isCreator && !isAdmin) {
       if (ticket.status !== 'open') {
         res.status(403).json({ error: 'Puuduvad õigused' });
         return;
