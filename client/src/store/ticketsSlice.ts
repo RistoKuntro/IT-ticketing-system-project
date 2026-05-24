@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './store';
-import { Ticket, Solution } from '../types';
+import { Ticket } from '../types';
 import * as ticketApi from '../api/ticketApi';
 
 interface FiltersState {
@@ -31,7 +31,7 @@ const initialState: TicketsState = {
 export const fetchTickets = createAsyncThunk(
   'tickets/fetchTickets',
   async (params?: FiltersState) => {
-    const response = await ticketApi.getTickets();
+    const response = await ticketApi.getTickets(params);
     return response;
   }
 );
@@ -99,8 +99,8 @@ const ticketsSlice = createSlice({
       })
       .addCase(fetchTickets.fulfilled, (state, action) => {
         state.loading = false;
-        state.tickets = Array.isArray(action.payload) ? action.payload : [];
-        state.total = state.tickets.length;
+        state.tickets = Array.isArray(action.payload?.tickets) ? action.payload.tickets : [];
+        state.total = action.payload?.total || state.tickets.length;
       })
       .addCase(fetchTickets.rejected, (state, action) => {
         state.loading = false;

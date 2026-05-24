@@ -7,6 +7,6 @@ export const getUsers = async () => {
 };
 
 export const updateUserRole = async (userId: number, role: 'admin' | 'user') => {
-  const { data } = await api.patch<{ user: User }>(`/users/${userId}/role`, { role });
+  const { data } = await api.put<{ user: User }>(`/users/${userId}/role`, { role });
   return data;
 };

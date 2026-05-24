@@ -10,7 +10,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
         name: true,
         email: true,
         createdAt: true,
-        role: { select: { name: true } },
+        role: { select: { id: true, name: true } },
       },
     });
 
@@ -19,7 +19,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role.name,
+        role: user.role,
         createdAt: user.createdAt,
       })),
     });
@@ -55,7 +55,7 @@ export const updateUserRole = async (req: Request, res: Response, next: NextFunc
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
-        role: updatedUser.role.name,
+        role: updatedUser.role,
       },
     });
   } catch (error) {

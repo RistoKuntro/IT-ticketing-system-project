@@ -95,7 +95,7 @@ const updateTicket = async (req, res, next) => {
             return;
         }
         const updateData = {};
-        if (isCreator) {
+        if (isCreator && !isAdmin) {
             if (ticket.status !== 'open') {
                 res.status(403).json({ error: 'Puuduvad õigused' });
                 return;
@@ -127,7 +127,12 @@ const updateTicket = async (req, res, next) => {
                 updateData.status = status;
             }
             if (typeof assigneeId !== 'undefined') {
-                updateData.assignee = { connect: { id: assigneeId } };
+                if (assigneeId === null) {
+                    updateData.assignee = { disconnect: true };
+                }
+                else {
+                    updateData.assignee = { connect: { id: assigneeId } };
+                }
             }
         }
         const updatedTicket = await prisma_1.prisma.ticket.update({

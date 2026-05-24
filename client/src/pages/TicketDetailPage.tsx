@@ -27,7 +27,7 @@ export const TicketDetailPage = () => {
   useEffect(() => {
     if (!isAdmin) return;
     getUsers()
-      .then(res => setUsers(res))
+      .then(res => setUsers(res.users))
       .catch(() => {});
   }, [isAdmin]);
 
