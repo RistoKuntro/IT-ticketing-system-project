@@ -1,6 +1,7 @@
 // Kontrollib JWT tokeni kehtivust ja lisab kasutaja andmed päringusse
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, JwtPayload } from '../utils/jwt';
+import { prisma } from '../lib/prisma';
 
 declare global {
   namespace Express {
@@ -10,7 +11,7 @@ declare global {
   }
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,6 +27,25 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  req.user = decoded;
-  next();
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      include: { role: true }
+    });
+
+    if (!dbUser) {
+      res.status(401).json({ error: 'Kasutajat ei leitud' });
+      return;
+    }
+
+    req.user = {
+      ...decoded,
+      role: dbUser.role.name
+    };
+    
+    next();
+  } catch (error) {
+    console.error('Viga authMiddleware:is', error);
+    res.status(500).json({ error: 'Serveri viga autentimisel' });
+  }
 };

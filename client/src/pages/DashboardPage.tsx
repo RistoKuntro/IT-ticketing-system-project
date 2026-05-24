@@ -13,7 +13,8 @@ export const DashboardPage = () => {
   const [localSearch, setLocalSearch] = useState<string>("");
 
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSpecialist } = useAuth();
+  const canManageAll = isAdmin || isSpecialist;
   const { tickets, total, isLoading, error, filters, loadTickets, createTicket, deleteTicket, changeFilters, resetFilters } = useTickets();
 
   useEffect(() => {
@@ -62,9 +63,9 @@ export const DashboardPage = () => {
       {/* 1. Päis */}
       <div className="page-header">
         <div>
-          <h1>{isAdmin ? "Kõik piletid" : "Minu piletid"}</h1>
+          <h1>{canManageAll ? "Kõik piletid" : "Minu piletid"}</h1>
           <p className="page-subtitle">
-            {isAdmin ? "Halda kõiki tugipiletteid" : "Vaata ja halda oma tugipiletteid"}
+            {canManageAll ? "Halda kõiki tugipiletteid" : "Vaata ja halda oma tugipiletteid"}
           </p>
         </div>
         <button className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
@@ -138,6 +139,7 @@ export const DashboardPage = () => {
               key={ticket.id}
               ticket={ticket}
               isAdmin={isAdmin}
+              isSpecialist={isSpecialist}
               onView={(id) => navigate(`/tickets/${id}`)}
               onDelete={(id) => setDeleteConfirmId(id)}
             />

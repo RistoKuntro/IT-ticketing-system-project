@@ -28,9 +28,9 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="app-container">
       <Navbar />
-      <main className="container mx-auto">
+      <main className="main-content">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

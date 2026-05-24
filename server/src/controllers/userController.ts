@@ -62,3 +62,37 @@ export const updateUserRole = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = Number(req.params.id);
+    await prisma.user.delete({ where: { id: userId } });
+    res.status(200).json({ message: 'Kasutaja kustutatud' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = Number(req.params.id);
+    const { name } = req.body;
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { name },
+      include: { role: true },
+    });
+    
+    res.status(200).json({
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      },
+    });
+  } catch(error) {
+    next(error);
+  }
+};

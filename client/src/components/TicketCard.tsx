@@ -5,6 +5,7 @@ import { Ticket } from "../types";
 interface TicketCardProps {
   ticket: Ticket;
   isAdmin: boolean;
+  isSpecialist?: boolean;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
 }
@@ -13,7 +14,8 @@ function truncate(text: string, max: number): string {
   return text.length > max ? text.slice(0, max) + "..." : text;
 }
 
-export default function TicketCard({ ticket, isAdmin, onView, onDelete }: TicketCardProps) {
+export default function TicketCard({ ticket, isAdmin, isSpecialist, onView, onDelete }: TicketCardProps) {
+  const canManageAll = isAdmin || isSpecialist;
   return (
     <div className="ticket-card">
       <div className="ticket-card-header">
@@ -36,7 +38,7 @@ export default function TicketCard({ ticket, isAdmin, onView, onDelete }: Ticket
           )}
         </div>
         <div className="ticket-actions">
-          {isAdmin && (
+          {canManageAll && (
             <button onClick={() => onDelete(ticket.id)} className="btn btn-danger btn-sm">
               Kustuta
             </button>

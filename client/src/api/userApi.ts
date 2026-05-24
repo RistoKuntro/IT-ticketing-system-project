@@ -6,7 +6,17 @@ export const getUsers = async () => {
   return data;
 };
 
-export const updateUserRole = async (userId: number, role: 'admin' | 'user') => {
+export const updateUserRole = async (userId: number, role: 'admin' | 'specialist' | 'user') => {
   const { data } = await api.put<{ user: User }>(`/users/${userId}/role`, { role });
+  return data;
+};
+
+export const deleteUser = async (userId: number) => {
+  const { data } = await api.delete<{ message: string }>(`/users/${userId}`);
+  return data;
+};
+
+export const updateUserName = async (userId: number, name: string) => {
+  const { data } = await api.put<{ user: User }>(`/users/${userId}`, { name });
   return data;
 };

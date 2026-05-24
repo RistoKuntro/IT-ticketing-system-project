@@ -27,7 +27,7 @@ router.post('/', authMiddleware, createTicketValidators, validate, createTicket)
 router.get('/:id', authMiddleware, getTicketById);
 router.put('/:id', authMiddleware, updateTicketValidators, validate, updateTicket);
 router.delete('/:id', authMiddleware, requireRole('admin'), deleteTicket);
-router.post('/:id/solutions', authMiddleware, requireRole('admin'), createSolutionValidators, validate, createSolution);
+router.post('/:id/solutions', authMiddleware, requireRole('admin', 'specialist'), createSolutionValidators, validate, createSolution);
 router.delete('/:id/solutions/:solutionId', authMiddleware, requireRole('admin'), deleteSolution);
 
 export default router;
