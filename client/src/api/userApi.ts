@@ -6,6 +6,11 @@ export const getUsers = async () => {
   return data;
 };
 
+export const getSpecialists = async () => {
+  const { data } = await api.get<{ users: User[] }>('/users/specialists');
+  return data;
+};
+
 export const updateUserRole = async (userId: number, role: 'admin' | 'specialist' | 'user') => {
   const { data } = await api.put<{ user: User }>(`/users/${userId}/role`, { role });
   return data;
@@ -16,7 +21,10 @@ export const deleteUser = async (userId: number) => {
   return data;
 };
 
-export const updateUserName = async (userId: number, name: string) => {
-  const { data } = await api.put<{ user: User }>(`/users/${userId}`, { name });
+export const updateUser = async (
+  userId: number,
+  payload: { name?: string; email?: string; phone?: string | null; role?: 'admin' | 'specialist' | 'user' }
+) => {
+  const { data } = await api.put<{ user: User }>(`/users/${userId}`, payload);
   return data;
 };

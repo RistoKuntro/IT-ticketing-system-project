@@ -17,13 +17,16 @@ model User {
   id              Int        @id @default(autoincrement())
   name            String
   email           String     @unique
+  phone           String?    
   passwordHash    String
   roleId          Int
   role            Role       @relation(fields: [roleId], references: [id])
   createdAt       DateTime   @default(now())
   createdTickets  Ticket[]   @relation("TicketCreator")
-  assignedTickets Ticket[]   @relation("TicketAssignee")
-  solutions       Solution[]
+  assignedTickets TicketAssignment[]
+  ticketResponses TicketResponse[]
+  feedbacks       Feedback[]
+  historyChanges  TicketHistory[]
 }
 
 model Ticket {
@@ -31,34 +34,77 @@ model Ticket {
   title       String
   description String
   status      TicketStatus @default(open)
-  priority    Priority     @default(medium)
+  priority    Priority     @default(none)
   creatorId   Int
-  assigneeId  Int?
+  isArchived  Boolean      @default(false)
+  closedAt    DateTime?
   creator     User         @relation("TicketCreator", fields: [creatorId], references: [id])
-  assignee    User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  solutions   Solution[]
+  assignments TicketAssignment[]
+  responses   TicketResponse[]
+  feedbacks   Feedback[]
+  history     TicketHistory[]
 }
 
-model Solution {
+model TicketAssignment {
+  ticketId     Int
+  specialistId Int
+  assignedAt   DateTime @default(now())
+
+  ticket       Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  specialist   User     @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  @@id([ticketId, specialistId])
+}
+
+model TicketResponse {
   id        Int      @id @default(autoincrement())
   content   String
   ticketId  Int
   authorId  Int
+  createdAt DateTime @default(now())
+
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   author    User     @relation(fields: [authorId], references: [id])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  userId    Int
+  rating    Int      @default(5)
+  comment   String?
   createdAt DateTime @default(now())
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([ticketId, userId])
+}
+
+model TicketHistory {
+  id         Int           @id @default(autoincrement())
+  ticketId   Int
+  actorId    Int?
+  oldStatus  TicketStatus?
+  newStatus  TicketStatus
+  changeDate DateTime      @default(now())
+
+  ticket     Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor      User?         @relation(fields: [actorId], references: [id])
 }
 
 enum TicketStatus {
   open
   in_progress
   closed
+  archived
   cancelled
 }
 
 enum Priority {
+  none
   low
   medium
   high

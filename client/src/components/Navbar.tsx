@@ -30,14 +30,19 @@ export const Navbar: React.FC = () => {
                   Admin paneel
                 </Link>
               )}
+              <Link to="/archive" className="navbar-link">
+                Arhiiv
+              </Link>
 
               {/* Kasutaja info */}
               <div className="navbar-user">
-                <div className="navbar-avatar">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="navbar-username">{user.name}</span>
-                <Badge label={user.role} variant="role" />
+                <Link to="/profile" style={{ display: 'flex', gap: 8, alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+                  <div className="navbar-avatar">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="navbar-username">{user.name}</span>
+                </Link>
+                <Badge label={typeof user.role === 'string' ? user.role : (user.role as any).name} variant="role" />
               </div>
 
               {/* Väljalogimine */}

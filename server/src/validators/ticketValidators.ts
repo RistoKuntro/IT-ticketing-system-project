@@ -17,8 +17,8 @@ export const createTicketValidators = [
     .withMessage('Kirjeldus peab olema 10-1000 tähemärki pikk'),
   body('priority')
     .optional()
-    .isIn(['low', 'medium', 'high'])
-    .withMessage('Priority peab olema low, medium või high'),
+    .isIn(['none', 'low', 'medium', 'high'])
+    .withMessage('Priority peab olema none, low, medium või high'),
 ];
 
 export const updateTicketValidators = [
@@ -34,16 +34,13 @@ export const updateTicketValidators = [
     .withMessage('Kirjeldus peab olema 10-1000 tähemärki pikk'),
   body('priority')
     .optional()
-    .isIn(['low', 'medium', 'high'])
-    .withMessage('Priority peab olema low, medium või high'),
+    .isIn(['none', 'low', 'medium', 'high'])
+    .withMessage('Priority peab olema none, low, medium või high'),
   body('status')
     .optional()
-    .isIn(['open', 'in_progress', 'closed', 'cancelled'])
-    .withMessage('Status peab olema open, in_progress, closed või cancelled'),
-  body('assigneeId')
-    .optional({ nullable: true })
-    .isInt({ gt: 0 })
-    .withMessage('assigneeId peab olema positiivne täisarv'),
+    .isIn(['open', 'in_progress', 'closed', 'archived', 'cancelled'])
+    .withMessage('Status peab olema open, in_progress, closed, archived või cancelled'),
+  // assigneeId removed: assignments are managed with TicketAssignment
 ];
 
 export const createSolutionValidators = [

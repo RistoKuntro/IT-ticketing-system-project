@@ -20,8 +20,8 @@ exports.createTicketValidators = [
         .withMessage('Kirjeldus peab olema 10-1000 tähemärki pikk'),
     (0, express_validator_1.body)('priority')
         .optional()
-        .isIn(['low', 'medium', 'high'])
-        .withMessage('Priority peab olema low, medium või high'),
+        .isIn(['none', 'low', 'medium', 'high'])
+        .withMessage('Priority peab olema none, low, medium või high'),
 ];
 exports.updateTicketValidators = [
     (0, express_validator_1.body)('title')
@@ -36,16 +36,13 @@ exports.updateTicketValidators = [
         .withMessage('Kirjeldus peab olema 10-1000 tähemärki pikk'),
     (0, express_validator_1.body)('priority')
         .optional()
-        .isIn(['low', 'medium', 'high'])
-        .withMessage('Priority peab olema low, medium või high'),
+        .isIn(['none', 'low', 'medium', 'high'])
+        .withMessage('Priority peab olema none, low, medium või high'),
     (0, express_validator_1.body)('status')
         .optional()
-        .isIn(['open', 'in_progress', 'closed', 'cancelled'])
-        .withMessage('Status peab olema open, in_progress, closed või cancelled'),
-    (0, express_validator_1.body)('assigneeId')
-        .optional({ nullable: true })
-        .isInt({ gt: 0 })
-        .withMessage('assigneeId peab olema positiivne täisarv'),
+        .isIn(['open', 'in_progress', 'closed', 'archived', 'cancelled'])
+        .withMessage('Status peab olema open, in_progress, closed, archived või cancelled'),
+    // assigneeId removed: assignments are managed with TicketAssignment
 ];
 exports.createSolutionValidators = [
     (0, express_validator_1.body)('content')

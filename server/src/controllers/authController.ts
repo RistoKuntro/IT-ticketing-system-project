@@ -113,8 +113,34 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
       name: user.name,
       email: user.email,
       role: user.role.name,
+      phone: user.phone ?? null,
       createdAt: user.createdAt
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Autentimine nõutud' });
+      return;
+    }
+
+    const { name, email, phone } = req.body as { name?: string; email?: string; phone?: string };
+
+    // If email provided, ensure it's not taken by another user
+    if (email) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing && existing.id !== req.user.id) {
+        res.status(409).json({ error: 'E-post juba kasutusel' });
+        return;
+      }
+    }
+
+    const updated = await prisma.user.update({ where: { id: req.user.id }, data: { name, email, phone }, include: { role: true } });
+    res.status(200).json({ user: { id: updated.id, name: updated.name, email: updated.email, phone: updated.phone, role: updated.role.name } });
   } catch (error) {
     next(error);
   }

@@ -46,7 +46,7 @@ export const fetchTicketById = createAsyncThunk(
 
 export const addTicket = createAsyncThunk(
   'tickets/addTicket',
-  async (data: { title: string; description: string; priority: string }) => {
+  async (data: { title: string; description: string }) => {
     const response = await ticketApi.createTicket(data);
     return response;
   }
@@ -72,7 +72,7 @@ export const addSolution = createAsyncThunk(
   'tickets/addSolution',
   async ({ ticketId, data }: { ticketId: number; data: { content: string } }) => {
     const response = await ticketApi.addSolution(ticketId, data);
-    return { ticketId, solution: response };
+    return { ticketId, response };
   }
 );
 
@@ -140,10 +140,12 @@ const ticketsSlice = createSlice({
       })
       .addCase(editTicket.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.tickets.findIndex(t => t.id === action.payload.id);
-        if (index !== -1) {
-          state.tickets[index] = action.payload;
-        }
+        const shouldArchive = action.payload?.isArchived;
+
+        state.tickets = shouldArchive
+          ? state.tickets.filter(t => t.id !== action.payload.id)
+          : state.tickets.map(t => (t.id === action.payload.id ? action.payload : t));
+
         if (state.selectedTicket?.id === action.payload.id) {
           state.selectedTicket = action.payload;
         }
@@ -176,11 +178,11 @@ const ticketsSlice = createSlice({
       })
       .addCase(addSolution.fulfilled, (state, action) => {
         state.loading = false;
-        if (state.selectedTicket?.id === action.payload.ticketId) {
-          if (!state.selectedTicket.solutions) {
-            state.selectedTicket.solutions = [];
-          }
-          state.selectedTicket.solutions.push(action.payload.solution);
+        if (state.selectedTicket?.id === action.payload.ticketId && state.selectedTicket) {
+          state.selectedTicket = {
+            ...state.selectedTicket,
+            responses: [...(state.selectedTicket.responses ?? []), action.payload.response as any],
+          } as Ticket;
         }
       })
       .addCase(addSolution.rejected, (state, action) => {

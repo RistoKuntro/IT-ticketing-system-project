@@ -180,10 +180,7 @@
  *                 type: string
  *                 enum: [open, in_progress, closed, cancelled]
  *                 description: Ainult admin saab muuta (v.a kasutaja saab oma pileti tühistada)
- *               assigneeId:
- *                 type: integer
- *                 nullable: true
- *                 description: Ainult admin saab määrata
+ *               # assigneeId removed; use assignments endpoints to manage specialists
  *     responses:
  *       200:
  *         description: Pilet uuendatud
@@ -251,7 +248,7 @@
  * @swagger
  * /api/tickets/{id}/solutions:
  *   post:
- *     summary: Lisa lahendus piletile (ainult admin)
+ *     summary: Lisa lahendus/piletivastus piletile (admin või specialist)
  *     tags: [Tickets]
  *     security:
  *       - bearerAuth: []
@@ -277,14 +274,14 @@
  *                 example: Lahendasin probleemi toitekaablit vahetades.
  *     responses:
  *       201:
- *         description: Lahendus lisatud
+ *         description: Pileti vastus lisatud
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 solution:
- *                   $ref: '#/components/schemas/Solution'
+ *                 ticketResponse:
+ *                   $ref: '#/components/schemas/TicketResponse'
  *       403:
  *         description: Puuduvad õigused — ainult admin
  *         content:

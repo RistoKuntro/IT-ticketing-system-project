@@ -13,7 +13,18 @@ export const createSolution = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    const solution = await prisma.solution.create({
+    if (req.user?.role === 'specialist') {
+      const isAssigned = await (prisma as any).ticketAssignment.findUnique({
+        where: { ticketId_specialistId: { ticketId, specialistId: req.user.id } },
+      });
+
+      if (!isAssigned) {
+        res.status(403).json({ error: 'Puuduvad õigused' });
+        return;
+      }
+    }
+
+    const ticketResponse = await (prisma as any).ticketResponse.create({
       data: {
         content,
         ticketId: ticket.id,
@@ -24,7 +35,7 @@ export const createSolution = async (req: Request, res: Response, next: NextFunc
       },
     });
 
-    res.status(201).json({ solution });
+    res.status(201).json({ ticketResponse });
   } catch (error) {
     next(error);
   }
@@ -33,14 +44,14 @@ export const createSolution = async (req: Request, res: Response, next: NextFunc
 export const deleteSolution = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const solutionId = Number(req.params.solutionId);
-    const solution = await prisma.solution.findUnique({ where: { id: solutionId } });
+    const ticketResponse = await (prisma as any).ticketResponse.findUnique({ where: { id: solutionId } });
 
-    if (!solution) {
+    if (!ticketResponse) {
       res.status(404).json({ error: 'Lahendust ei leitud' });
       return;
     }
 
-    await prisma.solution.delete({ where: { id: solutionId } });
+    await (prisma as any).ticketResponse.delete({ where: { id: solutionId } });
     res.status(200).json({ message: 'Lahendus kustutatud' });
   } catch (error) {
     next(error);

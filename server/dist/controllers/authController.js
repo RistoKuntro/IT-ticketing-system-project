@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMe = exports.login = exports.register = void 0;
+exports.updateMe = exports.getMe = exports.login = exports.register = void 0;
 const prisma_1 = require("../lib/prisma");
 const password_1 = require("../utils/password");
 const jwt_1 = require("../utils/jwt");
@@ -101,6 +101,7 @@ const getMe = async (req, res, next) => {
             name: user.name,
             email: user.email,
             role: user.role.name,
+            phone: user.phone ?? null,
             createdAt: user.createdAt
         });
     }
@@ -109,3 +110,26 @@ const getMe = async (req, res, next) => {
     }
 };
 exports.getMe = getMe;
+const updateMe = async (req, res, next) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ error: 'Autentimine nõutud' });
+            return;
+        }
+        const { name, email, phone } = req.body;
+        // If email provided, ensure it's not taken by another user
+        if (email) {
+            const existing = await prisma_1.prisma.user.findUnique({ where: { email } });
+            if (existing && existing.id !== req.user.id) {
+                res.status(409).json({ error: 'E-post juba kasutusel' });
+                return;
+            }
+        }
+        const updated = await prisma_1.prisma.user.update({ where: { id: req.user.id }, data: { name, email, phone }, include: { role: true } });
+        res.status(200).json({ user: { id: updated.id, name: updated.name, email: updated.email, phone: updated.phone, role: updated.role.name } });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.updateMe = updateMe;

@@ -53,7 +53,7 @@ const options: swaggerJsdoc.Options = {
             role: { type: "string", enum: ["admin", "user"] },
           },
         },
-        Solution: {
+        TicketResponse: {
           type: "object",
           properties: {
             id: { type: "integer", example: 1 },
@@ -71,24 +71,20 @@ const options: swaggerJsdoc.Options = {
             description: { type: "string", example: "Hommikust saati ei tule tööle, ekraan must." },
             status: {
               type: "string",
-              enum: ["open", "in_progress", "closed", "cancelled"],
+              enum: ["open", "in_progress", "closed", "archived", "cancelled"],
               example: "open",
             },
             priority: {
               type: "string",
-              enum: ["low", "medium", "high"],
-              example: "high",
+              enum: ["none", "low", "medium", "high"],
+              example: "none",
             },
             creator: { "$ref": "#/components/schemas/AuthUser" },
-            assignee: {
-              oneOf: [
-                { "$ref": "#/components/schemas/AuthUser" },
-                { type: "null" },
-              ],
-            },
-            solutions: {
+            isArchived: { type: "boolean", example: false },
+            closedAt: { type: ["string", "null"], format: "date-time" },
+            responses: {
               type: "array",
-              items: { "$ref": "#/components/schemas/Solution" },
+              items: { "$ref": "#/components/schemas/TicketResponse" },
             },
             createdAt: { type: "string", format: "date-time" },
             updatedAt: { type: "string", format: "date-time" },

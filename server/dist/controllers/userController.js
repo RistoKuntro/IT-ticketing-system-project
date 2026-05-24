@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUser = exports.deleteUser = exports.updateUserRole = exports.getAllUsers = void 0;
+exports.updateUser = exports.deleteUser = exports.updateUserRole = exports.getSpecialists = exports.getAllUsers = void 0;
 const prisma_1 = require("../lib/prisma");
 const getAllUsers = async (req, res, next) => {
     try {
@@ -9,6 +9,7 @@ const getAllUsers = async (req, res, next) => {
                 id: true,
                 name: true,
                 email: true,
+                phone: true,
                 createdAt: true,
                 role: { select: { id: true, name: true } },
             },
@@ -18,6 +19,7 @@ const getAllUsers = async (req, res, next) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                phone: user.phone,
                 role: user.role,
                 createdAt: user.createdAt,
             })),
@@ -28,6 +30,36 @@ const getAllUsers = async (req, res, next) => {
     }
 };
 exports.getAllUsers = getAllUsers;
+const getSpecialists = async (req, res, next) => {
+    try {
+        const users = await prisma_1.prisma.user.findMany({
+            where: { role: { name: 'specialist' } },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                createdAt: true,
+                role: { select: { id: true, name: true } },
+            },
+            orderBy: { name: 'asc' },
+        });
+        res.status(200).json({
+            users: users.map((user) => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                createdAt: user.createdAt,
+            })),
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getSpecialists = getSpecialists;
 const updateUserRole = async (req, res, next) => {
     try {
         const userId = Number(req.params.id);
@@ -51,6 +83,7 @@ const updateUserRole = async (req, res, next) => {
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
+                phone: updatedUser.phone,
                 role: updatedUser.role,
             },
         });
@@ -74,10 +107,25 @@ exports.deleteUser = deleteUser;
 const updateUser = async (req, res, next) => {
     try {
         const userId = Number(req.params.id);
-        const { name } = req.body;
+        const { name, email, phone, role } = req.body;
+        const data = {};
+        if (typeof name !== 'undefined')
+            data.name = name;
+        if (typeof email !== 'undefined')
+            data.email = email;
+        if (typeof phone !== 'undefined')
+            data.phone = phone;
+        if (typeof role !== 'undefined') {
+            const roleRecord = await prisma_1.prisma.role.findUnique({ where: { name: role } });
+            if (!roleRecord) {
+                res.status(404).json({ error: 'Rolli ei leitud' });
+                return;
+            }
+            data.roleId = roleRecord.id;
+        }
         const updatedUser = await prisma_1.prisma.user.update({
             where: { id: userId },
-            data: { name },
+            data,
             include: { role: true },
         });
         res.status(200).json({
@@ -85,6 +133,7 @@ const updateUser = async (req, res, next) => {
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
+                phone: updatedUser.phone,
                 role: updatedUser.role,
             },
         });

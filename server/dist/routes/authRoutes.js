@@ -9,4 +9,5 @@ const router = (0, express_1.Router)();
 router.post('/register', authValidators_1.registerValidators, authValidators_1.validate, authController_1.register);
 router.post('/login', authValidators_1.loginValidators, authValidators_1.validate, authController_1.login);
 router.get('/me', authMiddleware_1.authMiddleware, authController_1.getMe);
+router.put('/me', authMiddleware_1.authMiddleware, authController_1.updateMe);
 exports.default = router;

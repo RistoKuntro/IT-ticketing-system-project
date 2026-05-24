@@ -15,3 +15,8 @@ export const getMe = async () => {
   const { data } = await api.get<AuthUser>('/auth/me');
   return data;
 };
+
+export const updateMe = async (payload: { name?: string; email?: string; phone?: string }) => {
+  const { data } = await api.put('/auth/me', payload);
+  return data;
+};

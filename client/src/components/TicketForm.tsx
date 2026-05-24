@@ -13,15 +13,12 @@ const schema = z.object({
     .string()
     .min(10, "Kirjeldus peab olema vähemalt 10 tähemärki")
     .max(1000, "Kirjeldus on liiga pikk"),
-  priority: z.enum(["low", "medium", "high"], {
-    errorMap: () => ({ message: "Vali prioriteet" }),
-  }),
 });
 
 type FormData = z.infer<typeof schema>;
 
 interface TicketFormProps {
-  onSubmit: (data: { title: string; description: string; priority: string }) => Promise<void>;
+  onSubmit: (data: { title: string; description: string }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -32,7 +29,7 @@ export default function TicketForm({ onSubmit, onCancel }: TicketFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", description: "", priority: "medium" },
+    defaultValues: { title: "", description: "" },
   });
 
   return (
@@ -54,13 +51,7 @@ export default function TicketForm({ onSubmit, onCancel }: TicketFormProps) {
         />
       </FormField>
       
-      <FormField label="Prioriteet" error={errors.priority?.message} required>
-        <select {...register("priority")} className="input">
-          <option value="low">Madal</option>
-          <option value="medium">Keskmine</option>
-          <option value="high">Kõrge</option>
-        </select>
-      </FormField>
+
       
       <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "1rem" }}>
         <button type="button" onClick={onCancel} className="btn btn-secondary">
