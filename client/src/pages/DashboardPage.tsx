@@ -7,6 +7,7 @@ import TicketForm from "../components/TicketForm";
 import TicketCard from "../components/TicketCard";
 
 export const DashboardPage = () => {
+            <option value="none">Puudub</option>
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -30,7 +31,7 @@ export const DashboardPage = () => {
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  async function handleCreate(data: { title: string; description: string; priority: string }) {
+  async function handleCreate(data: { title: string; description: string }) {
     setCreateError(null);
     try {
       await createTicket(data);
@@ -100,6 +101,7 @@ export const DashboardPage = () => {
             onChange={(e) => handleFilterChange("priority", e.target.value)}
           >
             <option value="">Kõik prioriteedid</option>
+            <option value="none">Puudub</option>
             <option value="low">Madal</option>
             <option value="medium">Keskmine</option>
             <option value="high">Kõrge</option>

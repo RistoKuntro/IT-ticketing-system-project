@@ -11,7 +11,16 @@ const createSolution = async (req, res, next) => {
             res.status(404).json({ error: 'Pilet ei leitud' });
             return;
         }
-        const solution = await prisma_1.prisma.solution.create({
+        if (req.user?.role === 'specialist') {
+            const isAssigned = await prisma_1.prisma.ticketAssignment.findUnique({
+                where: { ticketId_specialistId: { ticketId, specialistId: req.user.id } },
+            });
+            if (!isAssigned) {
+                res.status(403).json({ error: 'Puuduvad õigused' });
+                return;
+            }
+        }
+        const ticketResponse = await prisma_1.prisma.ticketResponse.create({
             data: {
                 content,
                 ticketId: ticket.id,
@@ -21,7 +30,7 @@ const createSolution = async (req, res, next) => {
                 author: { select: { id: true, name: true, email: true } },
             },
         });
-        res.status(201).json({ solution });
+        res.status(201).json({ ticketResponse });
     }
     catch (error) {
         next(error);
@@ -31,12 +40,12 @@ exports.createSolution = createSolution;
 const deleteSolution = async (req, res, next) => {
     try {
         const solutionId = Number(req.params.solutionId);
-        const solution = await prisma_1.prisma.solution.findUnique({ where: { id: solutionId } });
-        if (!solution) {
+        const ticketResponse = await prisma_1.prisma.ticketResponse.findUnique({ where: { id: solutionId } });
+        if (!ticketResponse) {
             res.status(404).json({ error: 'Lahendust ei leitud' });
             return;
         }
-        await prisma_1.prisma.solution.delete({ where: { id: solutionId } });
+        await prisma_1.prisma.ticketResponse.delete({ where: { id: solutionId } });
         res.status(200).json({ message: 'Lahendus kustutatud' });
     }
     catch (error) {

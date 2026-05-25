@@ -4,12 +4,13 @@ import { Prisma, TicketStatus, Priority } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 
 const ticketInclude = {
-  creator: { select: { id: true, name: true, email: true } },
-  assignee: { select: { id: true, name: true, email: true } },
-  solutions: {
-    include: { author: { select: { id: true, name: true, email: true } } },
+  creator: { select: { id: true, name: true, email: true, phone: true } },
+  assignments: { include: { specialist: { select: { id: true, name: true, email: true, phone: true } } } },
+  responses: {
+    include: { author: { select: { id: true, name: true, email: true, phone: true } } },
     orderBy: { createdAt: 'asc' as const },
   },
+  feedbacks: { include: { user: { select: { id: true, name: true, email: true, phone: true } } } },
 };
 
 type TicketWithRelations = Prisma.TicketGetPayload<{
@@ -36,8 +37,29 @@ export const getAllTickets = async (req: Request, res: Response, next: NextFunct
       ];
     }
 
-    if (req.user?.role !== 'admin' && req.user?.role !== 'specialist') {
+    if (req.user?.role === 'specialist') {
+      const existingAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
+      // Specialist should see tickets they created OR tickets assigned to them
+      where.AND = [
+        ...existingAnd,
+        {
+          OR: [
+            { assignments: { some: { specialistId: req.user.id } } },
+            { creatorId: req.user.id },
+          ],
+        } as any,
+      ];
+    } else if (req.user?.role !== 'admin') {
       where.creatorId = req.user?.id;
+    }
+
+    const visibilityFilter = { isArchived: false, status: { not: 'archived' } } as any;
+    if (Array.isArray(where.AND)) {
+      where.AND = [...where.AND, visibilityFilter];
+    } else if (where.AND) {
+      where.AND = [where.AND, visibilityFilter];
+    } else {
+      where.AND = [visibilityFilter];
     }
 
     const [tickets, total] = await Promise.all([
@@ -61,8 +83,24 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
       return;
     }
 
-    if (req.user?.role !== 'admin' && req.user?.role !== 'specialist' && ticket.creatorId !== req.user?.id) {
+    if (req.user?.role === 'specialist') {
+      const isAssigned = await (prisma as any).ticketAssignment.findUnique({
+        where: { ticketId_specialistId: { ticketId, specialistId: req.user.id } },
+      });
+
+      // allow if assigned OR if specialist is the creator
+      if (!isAssigned && ticket.creatorId !== req.user?.id) {
+        res.status(403).json({ error: 'Puuduvad õigused' });
+        return;
+      }
+    } else if (req.user?.role !== 'admin' && ticket.creatorId !== req.user?.id) {
       res.status(403).json({ error: 'Puuduvad õigused' });
+      return;
+    }
+
+    const ticketRecord = ticket as any;
+    if (req.user?.role !== 'admin' && ticketRecord.isArchived) {
+      res.status(403).json({ error: 'Arhiveeritud pileti avamine pole lubatud' });
       return;
     }
 
@@ -72,16 +110,44 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+export const getArchivedTickets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = req.user!;
+    let where: any = {};
+
+    if (user.role === 'admin') {
+      where.status = 'archived';
+    } else if (user.role === 'specialist') {
+      // specialist should see archived tickets they created OR assigned to them
+      where = {
+        status: 'archived',
+        OR: [
+          { assignments: { some: { specialistId: user.id } } },
+          { creatorId: user.id },
+        ],
+      };
+    } else {
+      // regular user
+      where = { creatorId: user.id, status: 'archived' };
+    }
+
+    const tickets = await prisma.ticket.findMany({ where, include: ticketInclude, orderBy: { closedAt: 'desc' } as any });
+    res.status(200).json({ tickets });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { title, description, priority } = req.body;
+    const { title, description } = req.body;
 
     const ticket = await prisma.ticket.create({
       data: {
         title,
         description,
         status: 'open',
-        priority: (priority ?? 'medium') as Priority,
+        // priority left to admin; default applies
         creatorId: req.user!.id,
       },
       include: ticketInclude,
@@ -103,12 +169,11 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    const { title, description, priority, status, assigneeId } = req.body as {
+    const { title, description, priority, status } = req.body as {
       title?: string;
       description?: string;
       priority?: Priority;
-      status?: TicketStatus;
-      assigneeId?: number | null;
+      status?: TicketStatus | 'archived';
     };
 
     const isCreator = ticket.creatorId === req.user?.id;
@@ -121,7 +186,7 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    const updateData: Prisma.TicketUpdateInput = {};
+    const updateData: Prisma.TicketUpdateInput & { isArchived?: boolean; closedAt?: Date | null } = {};
 
     if (isCreator && !canManageAll) {
       if (ticket.status !== 'open') {
@@ -135,10 +200,6 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
 
       if (typeof description !== 'undefined') {
         updateData.description = description;
-      }
-
-      if (typeof priority !== 'undefined') {
-        updateData.priority = priority;
       }
 
       if (status === 'cancelled') {
@@ -155,19 +216,24 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
         updateData.description = description;
       }
 
-      if (typeof priority !== 'undefined') {
+      // Only admin may change priority
+      if (isAdmin && typeof priority !== 'undefined') {
         updateData.priority = priority;
       }
 
       if (typeof status !== 'undefined') {
-        updateData.status = status;
-      }
-
-      if (typeof assigneeId !== 'undefined') {
-        if (assigneeId === null) {
-          updateData.assignee = { disconnect: true };
+        if (status === 'closed') {
+          updateData.status = status;
+          updateData.closedAt = new Date();
+          updateData.isArchived = false;
+        } else if (status === 'archived') {
+          updateData.status = 'archived' as TicketStatus;
+          updateData.isArchived = true;
+          updateData.closedAt = new Date();
         } else {
-          updateData.assignee = { connect: { id: assigneeId } };
+          updateData.status = status;
+          updateData.closedAt = null;
+          updateData.isArchived = false;
         }
       }
     }
@@ -199,7 +265,7 @@ export const deleteTicket = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    await prisma.solution.deleteMany({ where: { ticketId } });
+    await (prisma as any).ticketResponse.deleteMany({ where: { ticketId } });
     await prisma.ticket.delete({ where: { id: ticketId } });
 
     res.status(200).json({ message: 'Pilet kustutatud' });

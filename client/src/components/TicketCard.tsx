@@ -8,14 +8,14 @@ interface TicketCardProps {
   isSpecialist?: boolean;
   onView: (id: number) => void;
   onDelete: (id: number) => void;
+  canView?: boolean;
 }
 
 function truncate(text: string, max: number): string {
   return text.length > max ? text.slice(0, max) + "..." : text;
 }
 
-export default function TicketCard({ ticket, isAdmin, isSpecialist, onView, onDelete }: TicketCardProps) {
-  const canManageAll = isAdmin || isSpecialist;
+export default function TicketCard({ ticket, isAdmin, onView, onDelete, canView = true }: TicketCardProps) {
   return (
     <div className="ticket-card">
       <div className="ticket-card-header">
@@ -27,23 +27,25 @@ export default function TicketCard({ ticket, isAdmin, isSpecialist, onView, onDe
       </div>
       <p className="ticket-description">{truncate(ticket.description, 120)}</p>
       <div className="ticket-card-footer">
-        <div className="ticket-meta">
+          <div className="ticket-meta">
           <span>👤 {ticket.creator.name}</span>
+          {ticket.creator.email && <span>✉️ {ticket.creator.email}</span>}
+          {ticket.creator.phone && <span>📞 {ticket.creator.phone}</span>}
           <span>📅 {new Date(ticket.createdAt).toLocaleDateString("et-EE")}</span>
-          {ticket.assignee && <span>🔧 {ticket.assignee.name}</span>}
-          {ticket.solutions.length > 0 && (
+          {ticket.assignments && ticket.assignments.length > 0 && <span>🔧 {ticket.assignments.map(a => `${a.specialist.name}${a.specialist.phone ? ' ('+a.specialist.phone+')' : ''}`).join(', ')}</span>}
+          {ticket.responses && ticket.responses.length > 0 && (
             <span>
-              💬 {ticket.solutions.length} lahendus{ticket.solutions.length !== 1 ? "t" : ""}
+              💬 {ticket.responses.length} vastus{ticket.responses.length !== 1 ? "ed" : ""}
             </span>
           )}
         </div>
         <div className="ticket-actions">
-          {canManageAll && (
+          {isAdmin && (
             <button onClick={() => onDelete(ticket.id)} className="btn btn-danger btn-sm">
               Kustuta
             </button>
           )}
-          <button onClick={() => onView(ticket.id)} className="btn btn-primary btn-sm">
+          <button onClick={() => onView(ticket.id)} className="btn btn-primary btn-sm" disabled={!canView}>
             Vaata →
           </button>
         </div>

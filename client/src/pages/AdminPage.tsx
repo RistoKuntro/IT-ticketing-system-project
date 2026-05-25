@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
-import { getUsers, updateUserRole, deleteUser, updateUserName } from "../api/userApi"
+import { getUsers, deleteUser, updateUser } from "../api/userApi"
 import { Badge } from "../components/Badge"
 import Modal from "../components/Modal"
 import { User } from "../types"
@@ -18,6 +18,9 @@ export const AdminPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [modalError, setModalError] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
+  const [editEmail, setEditEmail] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [editRole, setEditRole] = useState<"admin" | "specialist" | "user">("user")
 
   useEffect(() => {
     async function load() {
@@ -37,31 +40,26 @@ export const AdminPage: React.FC = () => {
     if (user.id === currentUser?.id) return; // Don't edit self here
     setSelectedUser(user);
     setEditName(user.name);
+    setEditEmail(user.email);
+    setEditPhone(user.phone ?? "");
+    setEditRole(user.role.name as "admin" | "specialist" | "user");
     setModalError(null);
   }
 
-  async function handleRoleChange(newRole: "admin" | "specialist" | "user") {
+  async function handleSaveUser() {
     if (!selectedUser) return;
     setModalError(null)
     try {
-      const res = await updateUserRole(selectedUser.id, newRole)
-      setUsers(prev => prev.map(u => (u.id === selectedUser.id ? { ...u, role: res.user.role } : u)))
-      setSelectedUser(res.user) // update modal 
+      const res = await updateUser(selectedUser.id, {
+        name: editName.trim(),
+        email: editEmail.trim(),
+        phone: editPhone.trim() || null,
+        role: editRole,
+      })
+      setUsers(prev => prev.map(u => (u.id === selectedUser.id ? { ...u, ...res.user } : u)))
+      setSelectedUser(null)
     } catch (e: unknown) {
-      setModalError(e instanceof Error ? e.message : "Viga rolli muutmisel")
-    }
-  }
-
-  async function handleNameUpdate() {
-    if (!selectedUser) return;
-    if (editName.trim() === selectedUser.name) return;
-    setModalError(null)
-    try {
-      const res = await updateUserName(selectedUser.id, editName.trim())
-      setUsers(prev => prev.map(u => (u.id === selectedUser.id ? { ...u, name: res.user.name } : u)))
-      setSelectedUser(res.user)
-    } catch (e: unknown) {
-      setModalError(e instanceof Error ? e.message : "Viga nime muutmisel")
+      setModalError(e instanceof Error ? e.message : "Viga kasutaja muutmisel")
     }
   }
 
@@ -107,6 +105,7 @@ export const AdminPage: React.FC = () => {
               <tr>
                 <th>Kasutaja</th>
                 <th>E-post</th>
+                <th>Telefon</th>
                 <th>Roll</th>
                 <th>Registreeritud</th>
               </tr>
@@ -132,6 +131,7 @@ export const AdminPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="user-email">{u.email}</td>
+                  <td className="user-email">{u.phone ?? "-"}</td>
                   <td>
                     <Badge label={u.role.name} variant="role" />
                   </td>
@@ -161,29 +161,49 @@ export const AdminPage: React.FC = () => {
             
             <div className="form-field">
               <label>Muuda nime</label>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <input 
-                  type="text" 
-                  className="input" 
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                />
-                <button className="btn btn-secondary" onClick={handleNameUpdate}>Salvesta</button>
-              </div>
+              <input 
+                type="text" 
+                className="input" 
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>E-post</label>
+              <input 
+                type="email" 
+                className="input" 
+                value={editEmail}
+                onChange={e => setEditEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Telefon</label>
+              <input 
+                type="text" 
+                className="input" 
+                value={editPhone}
+                onChange={e => setEditPhone(e.target.value)}
+              />
             </div>
 
             <div className="form-field">
               <label>Kasutaja roll (praegu: {selectedUser.role.name})</label>
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                <button className={`btn btn-sm ${selectedUser.role.name === 'admin' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => handleRoleChange('admin')}>Admin</button>
-                <button className={`btn btn-sm ${selectedUser.role.name === 'specialist' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => handleRoleChange('specialist')}>Spetsialist</button>
-                <button className={`btn btn-sm ${selectedUser.role.name === 'user' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => handleRoleChange('user')}>Kasutaja</button>
+                <button type="button" className={`btn btn-sm ${editRole === 'admin' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setEditRole('admin')}>Admin</button>
+                <button type="button" className={`btn btn-sm ${editRole === 'specialist' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setEditRole('specialist')}>Spetsialist</button>
+                <button type="button" className={`btn btn-sm ${editRole === 'user' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setEditRole('user')}>Kasutaja</button>
               </div>
             </div>
 
-            <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--border-color)", textAlign: "right" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--border-color)" }}>
               <button className="btn btn-danger" onClick={handleDeleteUser}>
                 Kustuta profiil
+              </button>
+              <button className="btn btn-primary" onClick={handleSaveUser}>
+                Salvesta
               </button>
             </div>
           </div>

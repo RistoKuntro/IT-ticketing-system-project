@@ -7,6 +7,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  phone?: string | null;
   role: Role;
   createdAt: string;
 }
@@ -16,10 +17,11 @@ export interface AuthUser {
   name: string;
   email: string;
   role: string;
+  phone?: string | null;
 }
 
-export type TicketStatus = "open" | "in_progress" | "closed" | "cancelled";
-export type Priority = "low" | "medium" | "high";
+export type TicketStatus = "open" | "in_progress" | "closed" | "archived" | "cancelled";
+export type Priority = "none" | "low" | "medium" | "high";
 
 export interface Ticket {
   id: number;
@@ -28,16 +30,28 @@ export interface Ticket {
   status: TicketStatus;
   priority: Priority;
   creator: User;
-  assignee: User | null;
+  assignments?: { specialist: User; assignedAt: string }[];
+  isArchived?: boolean;
+  closedAt?: string | null;
   createdAt: string;
   updatedAt: string;
-  solutions: Solution[];
+  responses?: TicketResponse[];
+  feedbacks?: Feedback[];
 }
 
-export interface Solution {
+export interface TicketResponse {
   id: number;
   content: string;
   author: User;
   createdAt: string;
   ticketId: number;
+}
+
+export interface Feedback {
+  id: number;
+  ticketId: number;
+  userId: number;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
 }

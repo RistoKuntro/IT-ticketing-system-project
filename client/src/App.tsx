@@ -6,6 +6,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TicketDetailPage } from './pages/TicketDetailPage';
 import { AdminPage } from './pages/AdminPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { ArchivePage } from './pages/ArchivePage';
 import { useSessionRestore } from './hooks/useSessionRestore';
 
 function AppContent() {
@@ -56,6 +58,21 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/archive"
+            element={
+              <ProtectedRoute>
+                <ArchivePage />
               </ProtectedRoute>
             }
           />

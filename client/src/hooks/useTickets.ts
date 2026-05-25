@@ -36,7 +36,7 @@ export function useTickets() {
     dispatch(fetchTicketById(id));
   };
 
-  const createTicket = (data: { title: string; description: string; priority: string }): Promise<any> => {
+  const createTicket = (data: { title: string; description: string }): Promise<any> => {
     return dispatch(addTicket(data)).unwrap();
   };
 
