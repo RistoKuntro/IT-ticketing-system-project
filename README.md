@@ -190,15 +190,15 @@ Baastee: /api
 
 ## Auth
 | Method | Endpoint | Kirjeldus | Auth |
-
-| POST | /api/auth/register | Registreeri uus kasutaja |
-| POST | /api/auth/login | Logi sisse ja saa JWT token |
-| GET | /api/auth/me | Hetkel sisse logitud kasutaja profiil |
-| PUT | /api/auth/me | Uuenda oma profiili |
+|---|---|---|---|
+| POST | /api/auth/register | Registreeri uus kasutaja | Ei |
+| POST | /api/auth/login | Logi sisse ja saa JWT token | Ei |
+| GET | /api/auth/me | Hetkel sisse logitud kasutaja profiil | Jah |
+| PUT | /api/auth/me | Uuenda oma profiili | Jah |
 
 ## Tickets
 | Method | Endpoint | Kirjeldus | Roll |
-
+|---|---|---|---|
 | GET | /api/tickets | Piletite nimekiri (filter + search) | auth kasutaja |
 | GET | /api/tickets/archived | Arhiveeritud piletid | auth kasutaja |
 | POST | /api/tickets | Loo uus pilet | auth kasutaja |
@@ -213,7 +213,7 @@ Baastee: /api
 
 ## Users
 | Method | Endpoint | Kirjeldus | Roll |
-
+|---|---|---|---|
 | GET | /api/users | Koik kasutajad | admin |
 | GET | /api/users/specialists | Spetsialistide nimekiri | admin, specialist |
 | PUT | /api/users/:id/role | Muuda kasutaja rolli | admin |
